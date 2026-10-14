@@ -1,0 +1,75 @@
+<div class="container mt-5">
+  <!-- Estado de carga -->
+  <div *ngIf="cargando" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Obteniendo detalles de la póliza...</p>
+  </div>
+
+  <!-- Estado de error -->
+  <div *ngIf="!cargando && errorMensaje" class="alert alert-danger shadow-sm" role="alert">
+    <i class="bi bi-exclamation-octagon-fill me-2"></i> {{ errorMensaje }}
+    <div class="mt-3">
+      <button class="btn btn-outline-danger btn-sm" (click)="volverAlListado()">Volver al listado</button>
+    </div>
+  </div>
+
+  <!-- Contenedor de la Tarjeta de Detalle -->
+  <div class="card shadow border-0" *ngIf="!cargando && poliza">
+    <!-- Cabecera de la Tarjeta -->
+    <div class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center">
+      <div>
+        <span class="text-uppercase text-muted small fw-bold d-block mb-1">Detalle de Contrato</span>
+        <h2 class="mb-0 fs-3">Póliza: <span class="font-monospace text-warning">{{ poliza.id }}</span></h2>
+      </div>
+      <!-- Badge de Estado Dinámico -->
+      <span class="badge px-3 py-2 rounded-pill fs-6" [ngClass]="{
+        'bg-success border border-success': poliza.status === 'activa',
+        'bg-warning text-dark border border-warning': poliza.status === 'pendiente',
+        'bg-danger border border-danger': poliza.status === 'expirada'
+      }">
+        {{ poliza.status }}
+      </span>
+    </div>
+
+    <!-- Cuerpo de la Tarjeta (Rejilla de Datos) -->
+    <div class="card-body p-4">
+      <div class="row g-4">
+        
+        <!-- Fila 1: Datos del Titular y Tipo -->
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border-start border-primary border-4">
+            <label class="text-muted small fw-bold text-uppercase d-block mb-1">Titular del Seguro</label>
+            <span class="fs-5 fw-semibold text-dark">{{ poliza.holder }}</span>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border-start border-secondary border-4">
+            <label class="text-muted small fw-bold text-uppercase d-block mb-1">Tipo de Cobertura</label>
+            <span class="fs-5 fw-semibold text-dark">
+              <i class="bi bi-shield-check text-success me-2"></i>{{ poliza.type }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="p-3 border rounded-3 bg-primary-subtle border-primary-subtle">
+            <label class="text-primary-emphasis small fw-bold text-uppercase d-block mb-1">Prima Total Mensual</label>
+            <span class="fs-4 fw-bold text-primary">
+              {{ poliza.premium }}€
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pie de la Tarjeta con Botón de Retorno -->
+    <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center">
+      <button class="btn btn-outline-secondary d-inline-flex align-items-center px-4" (click)="volverAlListado()">
+        <i class="bi bi-arrow-left me-2"></i> Volver al Listado
+      </button>
+      <small class="text-muted">ID Interno: {{ poliza.id }}</small>
+    </div>
+  </div>
+</div>

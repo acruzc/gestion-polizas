@@ -1,0 +1,121 @@
+<div class="container mt-5">
+  <!-- Tarjeta Contenedora Principal -->
+  <div class="card shadow-sm">
+    
+    <!-- Cabecera de la Tarjeta con Título y Contador -->
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+      <h3 class="mb-0 fs-4">
+        <i class="bi bi-shield-shaded me-2"></i>Gestión de Pólizas de Seguro
+      </h3>
+      <span class="badge bg-light text-primary fs-6 fw-bold">
+        Filtradas: {{ (polizas | filterByStatusPipe:estadoSeleccionado)?.length ?? 0 }}
+      </span>
+    </div>
+    
+    <!-- Cuerpo de la Tarjeta -->
+    <div class="card-body p-4">
+      
+      <!-- SECCIÓN DEL SELECTOR (FILTRO POR ESTADO) -->
+      <div class="row mb-4">
+        <div class="col-md-5 ms-auto">
+          <div class="input-group shadow-sm">
+            <label class="input-group-text bg-dark text-white border-dark" for="filtroEstado">
+              <i class="bi bi-funnel-fill me-2"></i>Filtrar por Estado:
+            </label>
+            <!-- El select actualiza automáticamente la variable estadoSeleccionado -->
+            <select 
+              id="filtroEstado" 
+              class="form-select border-dark" 
+              [(ngModel)]="estadoSeleccionado">
+              <option value="todos">Todos los estados</option>
+              <option value="activa">Activa</option>
+              <option value="expirada">Expirada</option>
+              <option value="pendiente">Pendiente</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESCENARIO 1: Estado de Carga (Spinner Animado) -->
+      <div *ngIf="cargando" class="text-center my-5 py-4">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <p class="mt-3 text-secondary fw-semibold">Conectando con el servidor de Node y obteniendo pólizas...</p>
+      </div>
+
+      <!-- ESCENARIO 2: Lista Vacía o Sin Resultados tras filtrar -->
+      <div *ngIf="!cargando && (polizas | filterByStatusPipe:estadoSeleccionado)?.length === 0" 
+           class="alert alert-warning text-center border-warning-subtle shadow-sm py-4 my-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-3 text-warning d-block mb-2"></i>
+        <h5 class="alert-heading fw-bold">No se encontraron pólizas</h5>
+        <p class="mb-0 text-muted">
+          No existen registros cargados en el sistema bajo el estado <strong>"{{ estadoSeleccionado }}"</strong>.
+        </p>
+      </div>
+
+      <!-- ESCENARIO 3: Tabla Estilizada de Pólizas (Se muestra solo si hay datos) -->
+      <div class="table-responsive rounded-3 border" *ngIf="!cargando && ((polizas | filterByStatusPipe:estadoSeleccionado)?.length ?? 0) > 0">
+        <table class="table table-hover table-striped align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col" class="ps-3">Nº Póliza</th>
+              <th scope="col">Titular del Seguro</th>
+              <th scope="col">Tipo de Cobertura</th>
+              <th scope="col" class="text-center">Estado</th>
+              <th scope="col" class="text-end pe-3">Prima Anual</th>
+              <th scope="col" class="text-center"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Aplicación directa de tu Pipe personalizado sobre el listado que viene de Node -->
+            <tr *ngFor="let poliza of polizas | filterByStatusPipe:estadoSeleccionado" 
+                (click)="verPoliza(poliza.id)" 
+                style="cursor: pointer;"
+                title="Haga clic para ver el detalle completo">
+              
+              <!-- Número de Póliza -->
+              <td class="ps-3">
+                <span class="font-monospace fw-bold text-secondary">{{ poliza.id }}</span>
+              </td>
+              
+              <!-- Titular -->
+              <td class="fw-semibold text-dark">{{ poliza.holder }}</td>
+              
+              <!-- Tipo de Seguro -->
+              <td>
+                <span class="badge bg-secondary-subtle text-secondary-emphasis border px-2 py-1">
+                  <i class="bi bi-file-earmark-text me-1"></i>{{ poliza.type }}
+                </span>
+              </td>
+              
+              
+              <!-- Badges de Estados Actualizados -->
+              <td class="text-center">
+                <span class="badge px-3 py-2 rounded-pill fs-7 fw-bold shadow-sm" [ngClass]="{
+                  'bg-success-subtle text-success border border-success': poliza.status === 'activa',
+                  'bg-danger-subtle text-danger border border-danger': poliza.status === 'expirada',
+                  'bg-warning-subtle text-warning-emphasis border border-warning': poliza.status === 'pendiente'
+                }">
+                  <i class="bi bi-circle-fill me-1 small"></i>{{ poliza.status }}
+                </span>
+              </td>
+              
+              <!-- Monto Económico -->
+              <td class="text-end pe-3 fw-bold text-primary fs-6">
+                {{ poliza.premium }}€
+              </td>
+
+              <!-- Botón de Acción (Ver Detalle) -->
+              <td class="text-center">
+                <button class="btn btn-outline-primary btn-sm shadow-sm"
+                        (click)="verPoliza(poliza.id)"
+                        title="Ver Detalle de la Póliza">
+                  <i class="bi bi-eye-fill">Ver</i>
+                </button>
+              </td>
+              
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
